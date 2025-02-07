@@ -5,6 +5,8 @@ import { User, UserDocument } from './schemas/user.schema';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 
 @Injectable()
@@ -15,6 +17,23 @@ export class UsersService implements OnModuleInit {
     private userModel: SoftDeleteModel<UserDocument>,
     private configService: ConfigService
   ) { }
+
+  getHashPassword = (password: string) => {
+    const salt = genSaltSync(10);
+    const hash = hashSync(password, salt);
+    return hash;
+  };
+
+  async create(userDto: CreateUserDto) {
+    const hashPassword = this.getHashPassword(userDto.password);
+    const user = await this.userModel.create({
+      email: userDto.email,
+      password: hashPassword,
+      name: userDto.name,
+    });
+    return user;
+  }
+
 
   async onModuleInit() {
     const count = await this.userModel.count();
@@ -75,6 +94,22 @@ export class UsersService implements OnModuleInit {
     return this.userModel.softDelete({
       _id: id
     })
+  }
+  findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return "Not found User!";
+    }
+
+    return this.userModel.findOne({
+      _id: id,
+    });
+  }
+
+  async update(updateUserDto: UpdateUserDto) {
+    return await this.userModel.updateOne(
+      { _id: updateUserDto._id },
+      { ...updateUserDto },
+    );
   }
 
 }
