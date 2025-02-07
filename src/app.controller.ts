@@ -9,25 +9,4 @@ export class AppController {
     private readonly authService: AuthService,
   ) { }
 
-  //tham khảo: https://www.loginradius.com/blog/engineering/guest-post/session-authentication-with-nestjs-and-mongodb/
-  //https://www.loginradius.com/blog/engineering/guest-post/session-authentication-with-nestjs-and-mongodb/
-
-  @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('/login')
-  async handleLogin(@Request() req) {
-    return this.authService.login(req.user)
-  }
-
-  //  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
-
-  //  @UseGuards(JwtAuthGuard)
-  @Get('profile1')
-  getProfile1(@Request() req) {
-    return req.user;
-  }
 }

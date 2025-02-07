@@ -8,7 +8,7 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import ms from 'ms';
 import passport from "passport";
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
