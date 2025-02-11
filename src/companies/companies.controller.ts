@@ -3,7 +3,7 @@ import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Request } from 'express';
-import { User } from '@/decorator/customize';
+import { ResponseMessage, User } from '@/decorator/customize';
 import { IUser } from '@/users/user.interface';
 import aqp from 'api-query-params';
 
@@ -17,6 +17,7 @@ export class CompaniesController {
   }
 
   @Get()
+  @ResponseMessage("Fecth list company")
   findAll(
     @Query("page") currentPage: string, 
     @Query("limit") limit: string, 

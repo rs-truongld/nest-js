@@ -1,3 +1,4 @@
+import { TransformInterceptor } from './core/transform.interceptor';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -24,9 +25,10 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'src/public'));
   app.setBaseViewsDir(join(__dirname, '..', 'src/views'));
   app.setViewEngine('ejs');
-
+  
   //config cookies
   app.use(cookieParser());
+  app.useGlobalInterceptors(new TransformInterceptor(reflector));
 
   //config session
   app.use(session({
