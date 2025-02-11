@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, Query } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Request } from 'express';
 import { User } from '@/decorator/customize';
 import { IUser } from '@/users/user.interface';
+import aqp from 'api-query-params';
 
 @Controller('companies')
 export class CompaniesController {
@@ -16,8 +17,12 @@ export class CompaniesController {
   }
 
   @Get()
-  findAll() {
-    return this.companiesService.findAll();
+  findAll(
+    @Query("page") currentPage: string, 
+    @Query("limit") limit: string, 
+    @Query() qs: string, 
+  ) {
+    return this.companiesService.findAll(currentPage, limit, qs);
   }
 
   @Get(':id')
