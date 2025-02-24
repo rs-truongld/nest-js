@@ -11,7 +11,7 @@ import { Reflector } from '@nestjs/core';
   
   export interface Response<T> {
     statusCode: number;
-    message: string;
+    message?: string;
     data: any;
   }
   
@@ -32,10 +32,7 @@ import { Reflector } from '@nestjs/core';
           map((data) => ({
             statusCode: context.switchToHttp().getResponse().statusCode,
             message: this.reflector.get<string>( RESPONSE_MESSAGE, context.getHandler(),) || '',
-            data: {
-              result: data,
-              meta: {} // if this is supposed to be the actual return then replace {} with data.result
-            }
+            data: data
           })),
         );
     }

@@ -6,19 +6,28 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Public, ResponseMessage, User } from '@/decorator/customize';
+import { IUser } from './user.interface';
 
 @Controller('users') // => /user
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ResponseMessage("Create a New User")
+  @Public()
   @Post()
-  create(@Body() userDto: CreateUserDto) {
-    return this.usersService.create(userDto);
-  }
+    async create(@Body() createUserDto: CreateUserDto, @User() user: IUser) {
+      let newUser = await this.usersService.create(createUserDto, user);
+      return { 
+        _id: newUser?.id, 
+        createAt: newUser?.createdAt 
+      }
+    }
 
   @Get()
   findAll() {
@@ -30,9 +39,12 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @ResponseMessage("Update a User")
   @Patch()
-  update(@Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto);
+  async update( @Body() updateUserDto: UpdateUserDto, @User() user: IUser)
+  {
+    let updateUser = await this.usersService.update(updateUserDto, user);
+    return updateUser;
   }
 
   @Delete(':id')

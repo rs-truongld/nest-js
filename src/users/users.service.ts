@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -6,7 +6,9 @@ import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
+import { timeStamp } from 'console';
+import { IUser } from './user.interface';
 
 
 @Injectable()
@@ -24,14 +26,52 @@ export class UsersService implements OnModuleInit {
     return hash;
   };
 
-  async create(userDto: CreateUserDto) {
-    const hashPassword = this.getHashPassword(userDto.password);
-    const user = await this.userModel.create({
-      email: userDto.email,
+  async create(userDto: CreateUserDto, user: IUser) {
+    const {name, email, password, age, gender, address, role, company } = userDto
+    const isExit = await this.userModel.findOne({email})
+
+    if (isExit) {
+      throw new BadRequestException(`Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác.`)
+    }
+    const hashPassword = this.getHashPassword(password);
+
+    let newUser = await this.userModel.create({
+      name, 
+      email,
       password: hashPassword,
-      name: userDto.name,
+      age,
+      gender,
+      address,
+      role,
+      company,
+      createBy: {
+        _id: user?._id,
+        email: user?.email
+      }
     });
-    return user;
+    return newUser;
+  }
+
+  async regiter(registerUserDto: RegisterUserDto) {
+
+    const {name, email, password, age, gender, address } = registerUserDto
+    const isExit = await this.userModel.findOne({email})
+
+    if (isExit) {
+      throw new BadRequestException(`Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác.`)
+    }
+    const hashPassword = this.getHashPassword(password);
+
+      let user = await this.userModel.create({
+        name,
+        email,
+        password: hashPassword,
+        age,
+        gender,
+        address,
+        role: "USER"
+      });
+      return user;
   }
 
 
@@ -105,11 +145,18 @@ export class UsersService implements OnModuleInit {
     });
   }
 
-  async update(updateUserDto: UpdateUserDto) {
-    return await this.userModel.updateOne(
-      { _id: updateUserDto._id },
-      { ...updateUserDto },
-    );
+  async update(updateUserDto: UpdateUserDto, user: IUser) {
+
+    const updateUser = await this.userModel.updateOne(
+      {_id: updateUserDto._id}, 
+      {
+                ... updateUserDto,
+                updatedBy: {
+                  _id: user._id,
+                  email: user.email
+              }
+              });
+    return updateUser;
   }
 
 }
