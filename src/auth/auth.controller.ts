@@ -4,11 +4,13 @@ import { LocalAuthGuard } from '@/stateful/passport/stateful.local.auth.guard';
 import { AuthService } from './auth.service';
 import { Public, ResponseMessage } from '@/decorator/customize';
 import { RegisterUserDto } from '@/users/dto/create-user.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private ConfigService: ConfigService
   ) { }
 
   //tham khảo: https://www.loginradius.com/blog/engineering/guest-post/session-authentication-with-nestjs-and-mongodb/
@@ -16,6 +18,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
+  @ResponseMessage("User login")
   @Post('/login')
   async handleLogin(@Request() req) {
     return this.authService.login(req.user)
